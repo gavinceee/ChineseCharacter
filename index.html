@@ -1,0 +1,638 @@
+<!DOCTYPE html> 
+<html lang='en-US' xml:lang='en-US'> 
+<head><title>Chinese character style migration based on convolutional neural network</title> 
+<meta charset='utf-8' /> 
+<meta content='TeX4ht (https://tug.org/tex4ht/)' name='generator' /> 
+<meta content='width=device-width,initial-scale=1' name='viewport' /> 
+<link href='ChineseFontGen.css' rel='stylesheet' type='text/css' /> 
+<meta content='ChineseFontGen.tex' name='src' /> 
+</head><body>
+<div class='maketitle'>
+
+
+
+<h2 class='titleHead'>Chinese character style migration based on
+convolutional neural network</h2>
+<div class='author'>Yingao Gao</div>
+<a href="./pdf/ChineseFontGen.pdf">Download PDF</a>
+<br />
+<div class='date'><span class='cmr-12'>October 5, 2022</span></div>
+</div>
+<section class='abstract' role='doc-abstract'> 
+<h3 class='abstracttitle'>
+<span class='cmbx-9'>Abstract</span>
+</h3>
+     <!-- l. 29 --><p class='noindent'><span class='cmr-9'>The number of Chinese characters is very large and their font styles are
+     </span><span class='cmr-9'>also very rich. It is very expensive to create a set of fonts with different
+     </span><span class='cmr-9'>styles  for  Chinese  characters.  In  order  to  reduce  the  cost  of  Chinese
+     </span><span class='cmr-9'>character style migration, this paper uses a convolutional neural network
+     </span><span class='cmr-9'>to perform Chinese character style migration. Experiments show that the
+     </span><span class='cmr-9'>convolutional neural network with the help of backpropagation algorithm
+     </span><span class='cmr-9'>can perform the task of Chinese character style migration very well.</span>
+</p>
+</section>
+<h3 class='sectionHead' id='introduction'><span class='titlemark'>1   </span> <a id='x1-10001'></a>Introduction</h3>
+<!-- l. 38 --><p class='noindent'>There are about 2,000 to 3,000 Chinese characters that are often used, which is a lot
+more in numbers compared to the letters in English. And, for historical and cultural
+reasons, there are very many different writing styles for the same Chinese character.
+Creating the appropriate font for the Chinese character style is a very costly affair,
+
+not only in terms of money but also in terms of time. Due to their structural
+characteristics, Chinese characters can be easily processed as images, and
+convolutional neural networks are very advantageous in image processing. In this
+paper, an algorithm for Chinese character style migration is implemented based on
+convolutional neural networks. It can be used in conjunction with the back
+propagation algorithm to effectively perform the task of Chinese character style
+migration.
+</p><!-- l. 51 --><p class='noindent'>This paper first introduces the components of the backpropagation algorithm and
+the convolutional neural network, then explains the specific structure of
+the convolutional neural network that can perform Chinese character style
+migration, and finally demonstrates the effectiveness of the method using
+experiments.
+</p><!-- l. 56 --><p class='noindent'>The main three contributions of this paper are as follows.
+</p><!-- l. 58 --><p class='noindent'>
+     </p><ol class='enumerate1'>
+<li class='enumerate' id='x1-1002x1'>An easy-to-train model for Chinese character font generation is proposed.
+     The larger the model is, the more likely it is to achieve better generation
+     results, but a larger model also means higher training costs. In this paper,
+     the proposed model has a small number of parameters and can be trained
+     with few computational resources.
+     </li>
+<li class='enumerate' id='x1-1004x2'>In  this  paper,  some  general  conclusions  are  obtained  about  neural
+     generation of Chinese characters through neural networks by trying to
+     compare the effect of different sizes of convolutional kernels and different
+     network  depths.  These  conclusions  are  instructive  for  designing  new
+     Chinese character font generation networks.
+     </li>
+<li class='enumerate' id='x1-1006x3'>The validity of the model is verified in the dataset constructed from the
+     actual fonts.
+</li></ol>
+
+<!-- l. 69 --><p class='noindent'>
+</p>
+<h3 class='sectionHead' id='related-work'><span class='titlemark'>2   </span> <a id='x1-20002'></a>Related work</h3>
+<!-- l. 70 --><p class='noindent'>The generation of new fonts for English or Latin alphabets has been studied in quite
+a few literatures. <span class='cite'>[<a href='#XBaluja2016'>2</a>]</span> found that neural networks can achieve letter font recognition
+and similar font generation using just 4 of the 26 English letters. <span class='cite'>[<a href='#XAzadi2018'>1</a>]</span> used conditional
+GAN in performing font style migration on letters.
+</p><!-- l. 72 --><p class='noindent'>However, the research on Chinese character generation is still relatively small. A
+possible GAN for generating calligraphic styles of specific Chinese characters is
+proposed in <span class='cite'>[<a href='#XXiao2021'>8</a>]</span> with very realistic detail variations, but the main focus is on the
+generation of a small number of calligraphic characters and is not discussed in the
+context of a large number of Chinese character generation. <span class='cite'>[<a href='#XLi2017'>5</a>]</span> proposed a
+cross-language approach for font style migration between fonts that learn the same
+language. <span class='cite'>[<a href='#XSun2018'>6</a>]</span> decoupled the content and style of Chinese characters using Variational
+Autoencoder (VAE), which enabled the model to get one-shot generalization ability
+and get good results with only a small amount of data for training, but mainly
+considered to generate handwritten type fonts. <span class='cite'>[<a href='#XZeng2020'>10</a>]</span> proposes a method to reduce the
+pattern collapse of GANs generated from Chinese characters. <span class='cite'>[<a href='#XChang2018'>3</a>]</span> proposed a method
+to generate handwritten style Chinese characters using CycleGAN. <span class='cite'>[<a href='#XTang2021'>7</a>]</span> proposed a
+meta-learning method based on recurrent neural networks that can mimic user
+handwritten fonts, but relying on the information of the stroke order when
+writing. <span class='cite'>[<a href='#XXie2021'>9</a>]</span> uses an unsupervised approach for font generation based on
+GAN.
+</p><!-- l. 81 --><p class='noindent'>Previous methods have made progress in Chinese character font generation, but each
+has shortcomings in training difficulty, model size, and usage scenarios. The method
+proposed in this paper has a simple training process, small resource consumption,
+and can generate common Chinese characters well.
+</p><!-- l. 83 --><p class='noindent'>
+</p>
+<h3 class='sectionHead' id='back-propagation-algorithm'><span class='titlemark'>3   </span> <a id='x1-30003'></a>Back propagation algorithm</h3>
+<!-- l. 85 --><p class='noindent'>A neural network is essentially a function <img alt='fW (x)  ' class='math' src='ChineseFontGen0x.png' /> determined using the set of
+parameters <img alt='W  ' class='math' src='ChineseFontGen1x.png' />. The neural networks are trained to find a suitable value among all
+possible values of <img alt='W  ' class='math' src='ChineseFontGen2x.png' /> so that the objective function <img alt='E = L(y,fW (x))  ' class='math' src='ChineseFontGen3x.png' /> reaches a
+small value. Where <img alt='x  ' class='math' src='ChineseFontGen4x.png' /> is the input to the neural network, <img alt='fW(x)  ' class='math' src='ChineseFontGen5x.png' /> is the output
+obtained by the neural network, <img alt='y  ' class='math' src='ChineseFontGen6x.png' /> is the ideal output corresponding to <img alt='x  ' class='math' src='ChineseFontGen7x.png' />, and
+<img alt='E  ' class='math' src='ChineseFontGen8x.png' /> denotes the difference between the output of network and the target
+output.
+</p><!-- l. 87 --><p class='noindent'>In practical applications, it is very difficult to obtain the analytical solution of the
+parameter <img alt='W  ' class='math' src='ChineseFontGen9x.png' /> mathematically because of the complexity of the network structure,
+
+so numerical methods are often used to obtain an approximate estimate of the
+optimal solution, which is often called the training of neural networks. With the
+increase in computing power of computers, the back propagation algorithm has
+become the mainstream method for network training. Back propagation is essentially
+calculating the gradients, and is called back propagation since in this method the
+gradients of the parameters close to the output are computed first, and the gradients
+of the parameters leaning forward are computed on top of that. The following is an
+example of the back propagation algorithm process used in a fully connected
+network.
+</p><!-- l. 89 --><p class='noindent'>A fully connected layer is a traditional multilayer perceptron that uses a softmax
+activation function in the output layer. ”Fully connected” means that every neuron in
+the previous layer is connected to every neuron in the next layer. Let there are <img alt='L  ' class='math' src='ChineseFontGen10x.png' />
+layers in the fully connected network, <img alt='x  ' class='math' src='ChineseFontGen11x.png' /> is the original input of the network, <img alt='zj  ' class='math' src='ChineseFontGen12x.png' /> is
+the output of the <img alt='j  ' class='math' src='ChineseFontGen13x.png' /> layer of the network, <img alt='aj  ' class='math' src='ChineseFontGen14x.png' /> is the result of <img alt='zj  ' class='math' src='ChineseFontGen15x.png' /> after the
+activation function, and <img alt='wij  ' class='math' src='ChineseFontGen16x.png' /> is the <img alt='i  ' class='math' src='ChineseFontGen17x.png' /> parameter of the <img alt='j  ' class='math' src='ChineseFontGen18x.png' /> layer of the network.
+The direction of updating <img alt='wij  ' class='math' src='ChineseFontGen19x.png' /> can be obtained by calculating the partial
+derivative of <img alt='E  ' class='math' src='ChineseFontGen20x.png' /> with respect to <img alt='wij  ' class='math' src='ChineseFontGen21x.png' />. In the calculation, the chain rule is
+used.
+</p>
+<table class='equation'><tr><td>
+<div class='math-display'>
+<img alt='∂E     ∂E ∂a     ∂E ∂a  ∂z
+----=  ------j = -----j --j-
+∂wij   ∂aj∂wij   ∂aj∂zj ∂wij
+' class='math-display' src='ChineseFontGen22x.png' /><a id='x1-3001r1'></a></div>
+</td><td class='equation-label'>(1)</td></tr></table>
+<!-- l. 92 --><p class='nopar'>
+</p><!-- l. 94 --><p class='noindent'>In this formula above, only <img alt='-∂zj
+∂wij  ' class='math' src='ChineseFontGen23x.png' /> is related to <img alt='wij  ' class='math' src='ChineseFontGen24x.png' />, the rest can be directly derived
+from the formula, and again from the procedure of <img alt='zj  ' class='math' src='ChineseFontGen25x.png' />
+</p>
+<table class='equation'><tr><td>
+
+<div class='math-display'>
+<img alt='           (             )
+∂zj     ∂   ∑n
+∂wij = ∂wij     wkj ⋅ak,j−1 = ai,j−1
+            k=1
+' class='math-display' src='ChineseFontGen26x.png' /><a id='x1-3002r2'></a></div>
+</td><td class='equation-label'>(2)</td></tr></table>
+<!-- l. 97 --><p class='nopar'>
+<img alt='aj−1  ' class='math' src='ChineseFontGen27x.png' /> has already been computed during the network forward computation, so the
+final result can be obtained.
+</p><!-- l. 100 --><p class='noindent'>By back propagation, the partial derivative of the cost function <img alt='E  ' class='math' src='ChineseFontGen28x.png' /> with respect to
+the parameter <img alt='wij  ' class='math' src='ChineseFontGen29x.png' /> can be obtained. The value of the function increases along the
+positive direction of the partial derivative, and the value of the cost function <img alt='E  ' class='math' src='ChineseFontGen30x.png' /> can
+be reduced by simply following the negative direction of the partial derivative. The
+exact method of updating the parameter values using partial derivatives will be given
+in the next section.
+</p><!-- l. 102 --><p class='noindent'>
+</p>
+<h3 class='sectionHead' id='adam-algorithm-kingma'><span class='titlemark'>4   </span> <a id='x1-40004'></a>Adam algorithm<span class='cite'>[<a href='#XKingma2014'>4</a>]</span></h3>
+<!-- l. 104 --><p class='noindent'>When updating new parameters, the simplest strategy can be used:
+</p>
+<table class='equation'><tr><td>
+<div class='math-display'>
+<img alt=' k     k− 1      k
+wij = w ij − λΔw ij
+' class='math-display' src='ChineseFontGen31x.png' /><a id='x1-4001r3'></a></div>
+</td><td class='equation-label'>(3)</td></tr></table>
+
+<!-- l. 107 --><p class='nopar'>
+where <img alt='k  ' class='math' src='ChineseFontGen32x.png' /> denotes the number of iterations of the training process and <img alt='Δwkij  ' class='math' src='ChineseFontGen33x.png' /> is the
+partial derivative of <img alt='E  ' class='math' src='ChineseFontGen34x.png' /> with respect to <img alt='wtij  ' class='math' src='ChineseFontGen35x.png' /> at the <img alt='k  ' class='math' src='ChineseFontGen36x.png' />th iteration. <img alt='λ  ' class='math' src='ChineseFontGen37x.png' /> is the
+weight to modify the parameter values according to the partial derivatives, also called
+the learning rate.
+</p><!-- l. 110 --><p class='noindent'>But the parameters converge slowly when training the network using this method
+and it may take a longer time to get a usable network.Adam algorithm is proposed to
+speed up the training of the network. Adam algorithm uses the first and
+second order moments of the variables to update the parameters under the
+premise of computing the gradient. The main flow is shown in Algorithm
+<a href='#x1-4002r1'>1<!-- tex4ht:ref: algorithm:Adam  --></a>.
+</p>
+<div class='algorithm'>
+
+<!-- l. 112 --><p class='noindent'></p><figure class='float' id='-adam-algorithm-'>
+
+<a id='x1-4002r1'></a>
+<a id='x1-4003'></a>
+<div class='algorithmic'>
+<span class='ALCitem'>Require:</span><span class='ALIndent' style='width:5.0pt;'> </span> Learning rate <span class='cmmi-10'>λ
+</span><span class='ALCitem'>Require:</span><span class='ALIndent' style='width:5.0pt;'>  </span><span class='cmmi-10'>ρ</span><sub><span class='cmr-7'>1</span></sub> and <span class='cmmi-10'>ρ</span><sub><span class='cmr-7'>2</span></sub> for exponential decay of moment estimation
+<span class='ALCitem'>Require:</span><span class='ALIndent' style='width:5.0pt;'>  </span><span class='cmmi-10'>δ </span>for numerical stability <a id='x1-4004r1'></a>
+ <span class='ALCitem'></span><span class='ALIndent' style='width:5.0pt;'> </span> Initialize <span class='cmmi-10'>s </span>and <span class='cmmi-10'>r </span>to 0 <a id='x1-4005r2'></a>
+ <br /><span class='ALCitem'></span><span class='ALIndent' style='width:5.0pt;'> </span> Initialize time step <span class='cmmi-10'>t </span>to 0 <a id='x1-4006r3'></a>
+ <br /><span class='ALCitem'></span><span class='ALIndent' style='width:5.0pt;'>  </span><span class='cmbx-10'>while</span> No stopping guidelines met <span class='cmbx-10'>do</span><span class='while-body'>
+<a id='x1-4007r4'></a>
+ <br /><span class='ALCitem'></span><span class='ALIndent' style='width:15.00002pt;'> </span>   Compute gradient: <span class='cmmi-10'>g</span> <a id='x1-4008r5'></a>
+ <br /><span class='ALCitem'></span><span class='ALIndent' style='width:15.00002pt;'> </span>   Update biased first-order moment estimation: <span class='cmmi-10'>s </span><span class='cmsy-10'>← </span><span class='cmmi-10'>ρ</span><sub><span class='cmr-7'>1</span></sub><span class='cmmi-10'>s </span>+ (1 <span class='cmsy-10'>− </span><span class='cmmi-10'>ρ</span><sub><span class='cmr-7'>1</span></sub>)<span class='cmmi-10'>g</span> <a id='x1-4009r6'></a>
+ <br /><span class='ALCitem'></span><span class='ALIndent' style='width:15.00002pt;'> </span>   Update biased second-order moment estimation: <span class='cmmi-10'>r </span><span class='cmsy-10'>← </span><span class='cmmi-10'>ρ</span><sub><span class='cmr-7'>2</span></sub><span class='cmmi-10'>r </span>+ (1 <span class='cmsy-10'>− </span><span class='cmmi-10'>ρ</span><sub><span class='cmr-7'>2</span></sub>)<span class='cmmi-10'>g </span><span class='cmsy-10'>⊙ </span><span class='cmmi-10'>g</span> <a id='x1-4010r7'></a>
+ <br /><span class='ALCitem'></span><span class='ALIndent' style='width:15.00002pt;'> </span>   Correct bias in first-order moment: <span class='cmmi-10'>ŝ </span><span class='cmsy-10'>←</span><img align='middle' alt='--s-
+1−ρt1' class='frac' src='ChineseFontGen38x.png' /> <a id='x1-4011r8'></a>
+ <br /><span class='ALCitem'></span><span class='ALIndent' style='width:15.00002pt;'> </span>   Correct bias in second-order moment: <span class='accenthat'><span class='cmmi-10'>r</span></span> <span class='cmsy-10'>←</span><img align='middle' alt='--r-
+1−ρt2' class='frac' src='ChineseFontGen39x.png' /> <a id='x1-4012r9'></a>
+ <br /><span class='ALCitem'></span><span class='ALIndent' style='width:15.00002pt;'> </span>   Calculate update: Δ<span class='cmmi-10'>w </span><span class='cmsy-10'>←−</span><span class='cmmi-10'>𝜖</span><img align='middle' alt='√ˆrˆs+δ' class='frac' src='ChineseFontGen40x.png' /> <a id='x1-4013r10'></a>
+ <br /><span class='ALCitem'></span><span class='ALIndent' style='width:15.00002pt;'> </span>   Update parameters: <span class='cmmi-10'>w </span><span class='cmsy-10'>← </span><span class='cmmi-10'>w </span>+ Δ<span class='cmmi-10'>w</span>
+  </span><a id='x1-4014r11'></a>
+ <br /><span class='ALCitem'></span><span class='ALIndent' style='width:5.0pt;'>  </span><span class='cmbx-10'>end</span> <span class='cmbx-10'>while</span>
+</div>
+
+</figure>
+</div>
+<h3 class='sectionHead' id='other-components-of-a-convolutional-network'><span class='titlemark'>5   </span> <a id='x1-50005'></a>Other components of a convolutional network</h3>
+<!-- l. 134 --><p class='noindent'>
+</p>
+<h4 class='subsectionHead' id='convolutional-layer'><span class='titlemark'>5.1   </span> <a id='x1-60005.1'></a>Convolutional layer</h4>
+<!-- l. 135 --><p class='noindent'>Convolutional neural networks (ConvNets or CNNs) are a class of neural networks
+that have proven to be very effective in areas such as image recognition and
+classification. The convolution layer consists of a set of filters, which can be
+considered as a two-dimensional digital matrix. The main purpose of convolution is
+to extract features from the input image. The output image can be generated by
+convolving the filter with the input image. The convolution operation is performed as
+follows:
+</p><!-- l. 138 --><p class='noindent'>
+     </p><ol class='enumerate1'>
+<li class='enumerate' id='x1-6002x1'>Overlaying a filter at a location on the image.
+     </li>
+<li class='enumerate' id='x1-6004x2'>Multiplying the value in the filter with the value of the corresponding pixel
+     in the image.
+     </li>
+<li class='enumerate' id='x1-6006x3'>The sum of the products above is obtained by adding the values of the
+     target pixels in the output image.</li></ol>
+<!-- l. 144 --><p class='noindent'>The sum of the products above is obtained by adding the values of the target pixels
+in the output image.
+</p><!-- l. 146 --><p class='noindent'>Repeat this operation for all locations of the image. Usually, convolution
+helps to find specific local image features (e.g., edges) to be used in the
+network later. For a two-dimensional signal, the convolution layer is given
+by
+
+</p>
+<table class='equation'><tr><td>
+<div class='math-display'>
+<img alt='                         ∑  ∑
+Y [m, n] = x[m,n]∗ h[m, n] =     x[i,j]⋅h[m − i,n − j]
+                          j  i
+' class='math-display' src='ChineseFontGen41x.png' /><a id='x1-6007r4'></a></div>
+</td><td class='equation-label'>(4)</td></tr></table>
+<!-- l. 149 --><p class='nopar'>
+</p><!-- l. 151 --><p class='noindent'>
+</p>
+<h4 class='subsectionHead' id='fully-connected-layer'><span class='titlemark'>5.2   </span> <a id='x1-70005.2'></a>Fully connected layer</h4>
+<!-- l. 152 --><p class='noindent'>The output of the convolution and pooling layers represent high-level features of the
+input image. The purpose of the fully-connected layer is to use these features to
+classify the input image into various classes based on the training dataset. In addition
+to classification, adding a fully-connected layer is also an inexpensive way to learn
+non-linear combinations of image features.
+</p><!-- l. 154 --><p class='noindent'>Most features from the convolutional and pooling layers may be beneficial for
+classification task, but a combination of these features may be better. The core
+operation of the fully connected layer is formulated as
+</p>
+<table class='equation'><tr><td>
+<div class='math-display'>
+<img alt='y = W x
+' class='math-display' src='ChineseFontGen42x.png' /><a id='x1-7001r5'></a></div>
+</td><td class='equation-label'>(5)</td></tr></table>
+<!-- l. 158 --><p class='nopar'>
+</p><!-- l. 160 --><p class='noindent'>
+</p>
+<h4 class='subsectionHead' id='batch-normalization-layer'><span class='titlemark'>5.3   </span> <a id='x1-80005.3'></a>Batch normalization layer</h4>
+<!-- l. 161 --><p class='noindent'>the regularization is performed in terms of the mini-batch at the time of performing
+the study. Specifically, the regularization is performed so that the mean of the data
+distribution is 0 and the variance is 1. In mathematical terms, this is shown
+below.
+</p>
+<div class='algorithm'>
+
+<!-- l. 164 --><p class='noindent'></p><figure class='float' id='-batch-normalization-'>
+
+<a id='x1-8001r2'></a>
+<a id='x1-8002'></a>
+<div class='algorithmic'>
+<a id='x1-8003r12'></a>
+ <span class='ALCitem'></span><span class='ALIndent' style='width:5.0pt;'> </span> Compute mini-batch mean: <span class='cmmi-10'>μ </span><span class='cmsy-10'>←</span><img align='middle' alt='1-
+m' class='frac' src='ChineseFontGen43x.png' /> <span class='cmex-10'>∑</span>
+   <sub><span class='cmmi-7'>i</span><span class='cmr-7'>=1</span></sub><sup><span class='cmmi-7'>m</span></sup><span class='cmmi-10'>x</span><sub><span class='cmmi-7'>i</span></sub> <a id='x1-8004r13'></a>
+ <br /><span class='ALCitem'></span><span class='ALIndent' style='width:5.0pt;'> </span> Compute mini-batch variance: <span class='cmmi-10'>δ</span><sup><span class='cmr-7'>2</span></sup> <span class='cmsy-10'>←</span><img align='middle' alt='1-
+m' class='frac' src='ChineseFontGen44x.png' /> <span class='cmex-10'>∑</span>
+   <sub><span class='cmmi-7'>i</span><span class='cmr-7'>=1</span></sub><sup><span class='cmmi-7'>m</span></sup>(<span class='cmmi-10'>x</span><sub><span class='cmmi-7'>i</span></sub> <span class='cmsy-10'>− </span><span class='cmmi-10'>μ</span>)<sup><span class='cmr-7'>2</span></sup> <a id='x1-8005r14'></a>
+ <br /><span class='ALCitem'></span><span class='ALIndent' style='width:5.0pt;'> </span> Normalize: <span class='accenthat'><span class='cmmi-10'>x</span></span> <span class='cmsy-10'>←</span><img align='middle' alt='x√i−μ-
+ δ2+𝜖' class='frac' src='ChineseFontGen45x.png' /> <a id='x1-8006r15'></a>
+ <br /><span class='ALCitem'></span><span class='ALIndent' style='width:5.0pt;'> </span> Scale and shift: <span class='cmmi-10'>y</span><sub><span class='cmmi-7'>i</span></sub> <span class='cmsy-10'>← </span><span class='cmmi-10'>γ</span><span class='accenthat'><span class='cmmi-10'>x</span><sub><span class='cmmi-7'>i</span></sub></span> + <span class='cmmi-10'>β</span>
+</div>
+
+</figure>
+</div>
+<!-- l. 175 --><p class='noindent'>The essence of neural network learning is the distribution of the learning data. Once
+the distribution of training data and test data are different, the generalization ability
+of the network is greatly reduced. On the other hand, once the distribution of each
+batch of training data is different (batch gradient descent), then the network must
+learn to adapt to a different distribution in each iteration, which will greatly reduce
+the training speed of the network. This is exactly the reason for doing normalized
+preprocessing on the data.
+</p><!-- l. 177 --><p class='noindent'>The uses of batch normalization layer include:
+     </p><ol class='enumerate1'>
+<li class='enumerate' id='x1-8008x1'>Speed up the training and convergence of the network.
+     </li>
+<li class='enumerate' id='x1-8010x2'>Less dependent on initial values.
+     </li>
+<li class='enumerate' id='x1-8012x3'>Prevent overfitting.</li></ol>
+<h4 class='subsectionHead' id='activation-function'><span class='titlemark'>5.4   </span> <a id='x1-90005.4'></a>Activation function</h4>
+<!-- l. 187 --><p class='noindent'>The distribution of data is overwhelmingly nonlinear, while the general computation
+of neural networks is linear, the introduction of activation function is to introduce
+nonlinearity in the neural network and strengthen the learning ability of the network.
+The biggest feature of the activation function is nonlinearity.
+</p><!-- l. 189 --><p class='noindent'>ReLU (Rectified Linear Unit) is the corrected linear unit function. The form of the
+function can be expressed as
+</p>
+<table class='equation'><tr><td>
+
+<div class='math-display'>
+<img alt='      {
+        x  (x &gt; 0)
+h(x) =  0  (x ≤ 0)
+' class='math-display' src='ChineseFontGen46x.png' /><a id='x1-9001r6'></a></div>
+</td><td class='equation-label'>(6)</td></tr></table>
+<!-- l. 196 --><p class='nopar'>
+</p><!-- l. 198 --><p class='noindent'>The effective derivative of ReLU is constant 1, which solves the problem of gradient
+disappearance that occurs in the deep network, and makes the deep network more
+trainable. At the same time, ReLU is a nonlinear function, which means
+that the first-order derivative is not constant. The derivative of ReLU is
+different for positive and negative input values, respectively. Therefore, ReLU is
+nonlinear.
+</p><!-- l. 201 --><p class='noindent'>
+</p>
+<h3 class='sectionHead' id='chinese-character-font-conversion'><span class='titlemark'>6   </span> <a id='x1-100006'></a>Chinese character font conversion</h3>
+<!-- l. 203 --><p class='noindent'>
+</p>
+<h4 class='subsectionHead' id='network-structure'><span class='titlemark'>6.1   </span> <a id='x1-110006.1'></a>Network Structure</h4>
+<figure class='figure'> 
+
+
+
+<!-- l. 208 --><p class='noindent' id='-network-structure-of-the-chinese-character-font-conversion-network-'> <img alt='PIC' height='69' src='figures//overall_schema-.png' width='68' /> <a id='x1-11001r1'></a>
+<a id='x1-11002'></a>
+</p>
+<figcaption class='caption'><span class='id'>Figure 1: </span><span class='content'>Network structure of the Chinese character font conversion network </span></figcaption><!-- tex4ht:label?: x1-11001r6  -->
+
+</figure>
+<!-- l. 213 --><p class='noindent'>The overall structure of the network used in this paper is shown in Fig <a href='#x1-11001r1'>1<!-- tex4ht:ref: fig:structure  --></a>, where Base
+extractor is mainly responsible for extracting sufficient features from the original
+image; Structure A and Structure B utilize the structure of residual and Inception
+fusion in Inception-ResNet v2, but unlike the original version, the number of channels
+of convolution is appropriately adjusted to improve the computational efficiency.
+Structure A and Structure B utilize the structure of residual and Inception fusion in
+Inception-ResNet v2, but unlike the original version, the number of channels of
+convolution is adjusted to improve the computational efficiency, making the
+overall computational scale smaller and more conducive to the application of
+Chinese character font generation, with <span class='cmmi-10'>m </span>and <span class='cmmi-10'>n </span>representing the number of
+repetitions of the corresponding modules, respectively. The specific structures of
+Stucture A, Structure B, and Reduce Block are shown in Fig <a href='#x1-11003r1'>1a<!-- tex4ht:ref: fig:StructureA  --></a>, Fig <a href='#x1-11004r2'>1b<!-- tex4ht:ref: fig:StructureB  --></a>, and
+Fig <a href='#x1-11005r3'>1c<!-- tex4ht:ref: fig:ReduceBlock  --></a>, while the structures of Base extractor and Output structure are
+different in different experiments. Therefore, they are listed in the experimental
+section.
+</p>
+<figure class='figure' id='-structures-of-networks-'> 
+
+
+
+<div class='minipage'><div class='subfigure'>
+<!-- l. 218 --><p class='noindent'></p><!-- l. 220 --><p class='noindent'><img alt='PIC' height='110' src='figures//structure_a.png' width='110' /> <a id='x1-11003r1'></a></p>
+<div class='caption'><span class='id'><span class='cmr-9'>(a) </span></span><span class='content'><span class='cmr-9'>Structure A</span>         </span></div>
+</div>
+</div> <div class='minipage'><div class='subfigure'>
+<!-- l. 228 --><p class='noindent'></p><!-- l. 230 --><p class='noindent'><img alt='PIC' height='110' src='figures//structure_b.png' width='110' /> <a id='x1-11004r2'></a></p>
+<div class='caption'><span class='id'><span class='cmr-9'>(b) </span></span><span class='content'><span class='cmr-9'>Structure B</span>               </span></div>
+</div>
+</div> <div class='minipage'><div class='subfigure'>
+<!-- l. 238 --><p class='noindent'></p><!-- l. 239 --><p class='noindent'><img alt='PIC' height='110' src='figures//reduce_block.png' width='110' /> <a id='x1-11005r3'></a></p>
+<div class='caption'><span class='id'><span class='cmr-9'>(c) </span></span><span class='content'><span class='cmr-9'>Reduce Block</span>
+</span></div>
+</div>
+</div>
+<a id='x1-11006r2'></a>
+<a id='x1-11007'></a>
+<figcaption class='caption'><span class='id'>Figure 2: </span><span class='content'>Structures of networks
+</span></figcaption><!-- tex4ht:label?: x1-11006r6  -->
+
+</figure>
+<!-- l. 251 --><p class='noindent'>In this paper, the input of the network is the source font image with a resolution of
+160 <span class='cmsy-10'>× </span>160, and the output is the target font image with a resolution of 80 <span class='cmsy-10'>× </span>80. The
+resolution of the feature map is 160 <span class='cmsy-10'>× </span>160 in the Base extractor, which is the same as
+the input image; the resolution drops to 80 <span class='cmsy-10'>× </span>80 from the Reduce Block, which is the
+same as the output image.
+</p><!-- l. 253 --><p class='noindent'>The loss function used for network training is mean absolute error.
+</p>
+<figure class='figure' id='-base-structures-'> 
+
+
+
+<div class='minipage'><div class='subfigure'>
+<!-- l. 261 --><p class='noindent'></p><!-- l. 263 --><p class='noindent'> <img alt='PIC' height='86' src='figures//B1-.png' width='86' /> <a id='x1-11008r1'></a></p>
+<div class='caption'><span class='id'><span class='cmr-9'>(a) </span></span><span class='content'><span class='cmr-9'>Structure of B1</span>    </span></div>
+</div>
+</div> <div class='minipage'><div class='subfigure'>
+<!-- l. 271 --><p class='noindent'></p><!-- l. 273 --><p class='noindent'> <img alt='PIC' height='86' src='figures//B2-.png' width='86' /> <a id='x1-11009r2'></a></p>
+<div class='caption'><span class='id'><span class='cmr-9'>(b) </span></span><span class='content'><span class='cmr-9'>Structure of B2</span>      </span></div>
+</div>
+</div> <div class='minipage'><div class='subfigure'>
+<!-- l. 281 --><p class='noindent'></p><!-- l. 282 --><p class='noindent'> <img alt='PIC' height='86' src='figures//B3-.png' width='86' /> <a id='x1-11010r3'></a></p>
+<div class='caption'><span class='id'><span class='cmr-9'>(c) </span></span><span class='content'><span class='cmr-9'>Structure of B3</span>
+</span></div>
+</div>
+</div>
+<a id='x1-11011r3'></a>
+<a id='x1-11012'></a>
+<figcaption class='caption'><span class='id'>Figure 3: </span><span class='content'>Base structures
+</span></figcaption><!-- tex4ht:label?: x1-11011r6  -->
+
+</figure>
+<figure class='figure' id='-output-blocks-'> 
+
+
+
+<div class='minipage'><div class='subfigure'>
+<!-- l. 297 --><p class='noindent'></p><!-- l. 299 --><p class='noindent'> <img alt='PIC' height='96' src='figures//O1-.png' width='96' /> <a id='x1-11013r1'></a></p>
+<div class='caption'><span class='id'><span class='cmr-9'>(a) </span></span><span class='content'><span class='cmr-9'>Structure of O1</span>   </span></div>
+</div>
+</div> <div class='minipage'><div class='subfigure'>
+<!-- l. 307 --><p class='noindent'></p><!-- l. 309 --><p class='noindent'> <img alt='PIC' height='96' src='figures//O2-.png' width='96' /> <a id='x1-11014r2'></a></p>
+<div class='caption'><span class='id'><span class='cmr-9'>(b) </span></span><span class='content'><span class='cmr-9'>Structure of O2</span>      </span></div>
+</div>
+</div> <a id='x1-11015r4'></a>
+<a id='x1-11016'></a>
+<figcaption class='caption'><span class='id'>Figure 4: </span><span class='content'>Output blocks
+</span></figcaption><!-- tex4ht:label?: x1-11015r6  -->
+
+</figure>
+<h3 class='sectionHead' id='experiment'><span class='titlemark'>7   </span> <a id='x1-120007'></a>Experiment</h3>
+<div class='table'>
+
+<!-- l. 334 --><p class='noindent'></p><figure class='float' id='-configurations-of-networks-'>
+
+<a id='x1-12001r1'></a>
+<a id='x1-12002'></a>
+<figcaption class='caption'><span class='id'>Table 1: </span><span class='content'>Configurations of networks                                    </span></figcaption><!-- tex4ht:label?: x1-12001r7  -->
+<div class='tabular'> <table class='tabular' id='TBL-2'><colgroup id='TBL-2-1g'><col id='TBL-2-1' /></colgroup><colgroup id='TBL-2-2g'><col id='TBL-2-2' /></colgroup><colgroup id='TBL-2-3g'><col id='TBL-2-3' /></colgroup><colgroup id='TBL-2-4g'><col id='TBL-2-4' /></colgroup><colgroup id='TBL-2-5g'><col id='TBL-2-5' /></colgroup><colgroup id='TBL-2-6g'><col id='TBL-2-6' /></colgroup><colgroup id='TBL-2-7g'><col id='TBL-2-7' /></colgroup><tr class='hline'><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr id='TBL-2-1-' style='vertical-align:baseline;'><td class='td11' id='TBL-2-1-1' style='white-space:nowrap; text-align:center;'>Configuration</td><td class='td11' id='TBL-2-1-2' style='white-space:nowrap; text-align:center;'>Base extractor</td><td class='td11' id='TBL-2-1-3' style='white-space:nowrap; text-align:center;'>m</td><td class='td11' id='TBL-2-1-4' style='white-space:nowrap; text-align:center;'>n</td><td class='td11' id='TBL-2-1-5' style='white-space:nowrap; text-align:center;'>Output structure</td><td class='td11' id='TBL-2-1-6' style='white-space:nowrap; text-align:center;'>dropout</td><td class='td11' id='TBL-2-1-7' style='white-space:nowrap; text-align:center;'>Sigmod</td>
+</tr><tr class='hline'><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr id='TBL-2-2-' style='vertical-align:baseline;'><td class='td11' id='TBL-2-2-1' style='white-space:nowrap; text-align:center;'>      1         </td><td class='td11' id='TBL-2-2-2' style='white-space:nowrap; text-align:center;'>     B1        </td><td class='td11' id='TBL-2-2-3' style='white-space:nowrap; text-align:center;'> 5 </td><td class='td11' id='TBL-2-2-4' style='white-space:nowrap; text-align:center;'>5</td><td class='td11' id='TBL-2-2-5' style='white-space:nowrap; text-align:center;'>      O1         </td><td class='td11' id='TBL-2-2-6' style='white-space:nowrap; text-align:center;'>  0.9   </td><td class='td11' id='TBL-2-2-7' style='white-space:nowrap; text-align:center;'>  Yes   </td></tr><tr class='hline'><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr id='TBL-2-3-' style='vertical-align:baseline;'><td class='td11' id='TBL-2-3-1' style='white-space:nowrap; text-align:center;'> 2 </td><td class='td11' id='TBL-2-3-2' style='white-space:nowrap; text-align:center;'> B2 </td><td class='td11' id='TBL-2-3-3' style='white-space:nowrap; text-align:center;'> 5 </td><td class='td11' id='TBL-2-3-4' style='white-space:nowrap; text-align:center;'>5</td><td class='td11' id='TBL-2-3-5' style='white-space:nowrap; text-align:center;'> O1 </td><td class='td11' id='TBL-2-3-6' style='white-space:nowrap; text-align:center;'> 0.9 </td><td class='td11' id='TBL-2-3-7' style='white-space:nowrap; text-align:center;'> -</td>
+</tr><tr class='hline'><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr id='TBL-2-4-' style='vertical-align:baseline;'><td class='td11' id='TBL-2-4-1' style='white-space:nowrap; text-align:center;'>      3         </td><td class='td11' id='TBL-2-4-2' style='white-space:nowrap; text-align:center;'>     B3        </td><td class='td11' id='TBL-2-4-3' style='white-space:nowrap; text-align:center;'> 3 </td><td class='td11' id='TBL-2-4-4' style='white-space:nowrap; text-align:center;'>3</td><td class='td11' id='TBL-2-4-5' style='white-space:nowrap; text-align:center;'>      O2         </td><td class='td11' id='TBL-2-4-6' style='white-space:nowrap; text-align:center;'>  0.9   </td><td class='td11' id='TBL-2-4-7' style='white-space:nowrap; text-align:center;'>   -    </td></tr><tr class='hline'><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr id='TBL-2-5-' style='vertical-align:baseline;'><td class='td11' id='TBL-2-5-1' style='white-space:nowrap; text-align:center;'> 4 </td><td class='td11' id='TBL-2-5-2' style='white-space:nowrap; text-align:center;'> B1 </td><td class='td11' id='TBL-2-5-3' style='white-space:nowrap; text-align:center;'> 5 </td><td class='td11' id='TBL-2-5-4' style='white-space:nowrap; text-align:center;'>5</td><td class='td11' id='TBL-2-5-5' style='white-space:nowrap; text-align:center;'> O1 </td><td class='td11' id='TBL-2-5-6' style='white-space:nowrap; text-align:center;'> - </td><td class='td11' id='TBL-2-5-7' style='white-space:nowrap; text-align:center;'> -</td>
+</tr><tr class='hline'><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr id='TBL-2-6-' style='vertical-align:baseline;'><td class='td11' id='TBL-2-6-1' style='white-space:nowrap; text-align:center;'>      5         </td><td class='td11' id='TBL-2-6-2' style='white-space:nowrap; text-align:center;'>     B2        </td><td class='td11' id='TBL-2-6-3' style='white-space:nowrap; text-align:center;'> 5 </td><td class='td11' id='TBL-2-6-4' style='white-space:nowrap; text-align:center;'>5</td><td class='td11' id='TBL-2-6-5' style='white-space:nowrap; text-align:center;'>      O1         </td><td class='td11' id='TBL-2-6-6' style='white-space:nowrap; text-align:center;'>   -     </td><td class='td11' id='TBL-2-6-7' style='white-space:nowrap; text-align:center;'>   -    </td>
+</tr><tr class='hline'><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr id='TBL-2-7-' style='vertical-align:baseline;'><td class='td11' id='TBL-2-7-1' style='white-space:nowrap; text-align:center;'>      6         </td><td class='td11' id='TBL-2-7-2' style='white-space:nowrap; text-align:center;'>     B2        </td><td class='td11' id='TBL-2-7-3' style='white-space:nowrap; text-align:center;'> 3 </td><td class='td11' id='TBL-2-7-4' style='white-space:nowrap; text-align:center;'>3</td><td class='td11' id='TBL-2-7-5' style='white-space:nowrap; text-align:center;'>      O1         </td><td class='td11' id='TBL-2-7-6' style='white-space:nowrap; text-align:center;'>   -     </td><td class='td11' id='TBL-2-7-7' style='white-space:nowrap; text-align:center;'>   -    </td>
+</tr><tr class='hline'><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr id='TBL-2-8-' style='vertical-align:baseline;'><td class='td11' id='TBL-2-8-1' style='white-space:nowrap; text-align:center;'>      7         </td><td class='td11' id='TBL-2-8-2' style='white-space:nowrap; text-align:center;'>     B3        </td><td class='td11' id='TBL-2-8-3' style='white-space:nowrap; text-align:center;'> 3 </td><td class='td11' id='TBL-2-8-4' style='white-space:nowrap; text-align:center;'>3</td><td class='td11' id='TBL-2-8-5' style='white-space:nowrap; text-align:center;'>      O2         </td><td class='td11' id='TBL-2-8-6' style='white-space:nowrap; text-align:center;'>   -     </td><td class='td11' id='TBL-2-8-7' style='white-space:nowrap; text-align:center;'>   -    </td>
+</tr><tr class='hline'><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr id='TBL-2-9-' style='vertical-align:baseline;'><td class='td11' id='TBL-2-9-1' style='white-space:nowrap; text-align:center;'>      8         </td><td class='td11' id='TBL-2-9-2' style='white-space:nowrap; text-align:center;'>     B3        </td><td class='td11' id='TBL-2-9-3' style='white-space:nowrap; text-align:center;'> 3 </td><td class='td11' id='TBL-2-9-4' style='white-space:nowrap; text-align:center;'>3</td><td class='td11' id='TBL-2-9-5' style='white-space:nowrap; text-align:center;'>      O2         </td><td class='td11' id='TBL-2-9-6' style='white-space:nowrap; text-align:center;'>   -     </td><td class='td11' id='TBL-2-9-7' style='white-space:nowrap; text-align:center;'>   -    </td>
+</tr><tr class='hline'><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr id='TBL-2-10-' style='vertical-align:baseline;'><td class='td11' id='TBL-2-10-1' style='white-space:nowrap; text-align:center;'>      9         </td><td class='td11' id='TBL-2-10-2' style='white-space:nowrap; text-align:center;'>     B2        </td><td class='td11' id='TBL-2-10-3' style='white-space:nowrap; text-align:center;'> 3 </td><td class='td11' id='TBL-2-10-4' style='white-space:nowrap; text-align:center;'>3</td><td class='td11' id='TBL-2-10-5' style='white-space:nowrap; text-align:center;'>      O2         </td><td class='td11' id='TBL-2-10-6' style='white-space:nowrap; text-align:center;'>   -     </td><td class='td11' id='TBL-2-10-7' style='white-space:nowrap; text-align:center;'>   -    </td>
+</tr><tr class='hline'><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr></table></div>
+
+</figure>
+</div>
+<figure class='figure' id='-results-of-different-networks-'> 
+
+
+
+<div class='minipage'><div class='subfigure'>
+<!-- l. 366 --><p class='noindent'></p><!-- l. 367 --><p class='noindent'><img alt='PIC' height='103' src='figures//result/net1.png' width='103' /> <a id='x1-12003r1'></a></p>
+<div class='caption'><span class='id'><span class='cmr-9'>(a) </span></span><span class='content'><span class='cmr-9'>Result of network 1</span>
+</span></div>
+</div> <div class='subfigure'>
+<!-- l. 371 --><p class='noindent'></p><!-- l. 372 --><p class='noindent'><img alt='PIC' height='103' src='figures//result/net2.png' width='103' /> <a id='x1-12004r2'></a></p>
+<div class='caption'><span class='id'><span class='cmr-9'>(b) </span></span><span class='content'><span class='cmr-9'>Result of network 2</span>
+</span></div>
+</div> <div class='subfigure'>
+<!-- l. 376 --><p class='noindent'></p><!-- l. 377 --><p class='noindent'><img alt='PIC' height='103' src='figures//result/net3.png' width='103' /> <a id='x1-12005r3'></a></p>
+<div class='caption'><span class='id'><span class='cmr-9'>(c) </span></span><span class='content'><span class='cmr-9'>Result of network 3</span>
+</span></div>
+</div></div>
+<div class='minipage'><div class='subfigure'>
+<!-- l. 384 --><p class='noindent'></p><!-- l. 385 --><p class='noindent'><img alt='PIC' height='103' src='figures//result/net4.png' width='103' /> <a id='x1-12006r4'></a></p>
+<div class='caption'><span class='id'><span class='cmr-9'>(d) </span></span><span class='content'><span class='cmr-9'>Result of network 4</span>
+</span></div>
+</div> <div class='subfigure'>
+<!-- l. 389 --><p class='noindent'></p><!-- l. 390 --><p class='noindent'><img alt='PIC' height='103' src='figures//result/net5.png' width='103' /> <a id='x1-12007r5'></a></p>
+<div class='caption'><span class='id'><span class='cmr-9'>(e) </span></span><span class='content'><span class='cmr-9'>Result of network 5</span>
+</span></div>
+</div> <div class='subfigure'>
+<!-- l. 394 --><p class='noindent'></p><!-- l. 395 --><p class='noindent'><img alt='PIC' height='103' src='figures//result/net6.png' width='103' /> <a id='x1-12008r6'></a></p>
+<div class='caption'><span class='id'><span class='cmr-9'>(f) </span></span><span class='content'><span class='cmr-9'>Result of network 6</span>
+</span></div>
+</div></div>
+<div class='minipage'><div class='subfigure'>
+<!-- l. 402 --><p class='noindent'></p><!-- l. 403 --><p class='noindent'><img alt='PIC' height='103' src='figures//result/net7.png' width='103' /> <a id='x1-12009r7'></a></p>
+<div class='caption'><span class='id'><span class='cmr-9'>(g) </span></span><span class='content'><span class='cmr-9'>Result of network 7</span>
+</span></div>
+</div> <div class='subfigure'>
+<!-- l. 407 --><p class='noindent'></p><!-- l. 408 --><p class='noindent'><img alt='PIC' height='103' src='figures//result/net8.png' width='103' /> <a id='x1-12010r8'></a></p>
+<div class='caption'><span class='id'><span class='cmr-9'>(h) </span></span><span class='content'><span class='cmr-9'>Result of network 8</span>
+</span></div>
+</div> <div class='subfigure'>
+<!-- l. 412 --><p class='noindent'></p><!-- l. 413 --><p class='noindent'><img alt='PIC' height='103' src='figures//result/net9.png' width='103' /> <a id='x1-12011r9'></a></p>
+<div class='caption'><span class='id'><span class='cmr-9'>(i) </span></span><span class='content'><span class='cmr-9'>Result of network 9</span>
+</span></div>
+</div></div> <a id='x1-12012r5'></a>
+<a id='x1-12013'></a>
+<figcaption class='caption'><span class='id'>Figure 5: </span><span class='content'>Results of different networks
+</span></figcaption><!-- tex4ht:label?: x1-12012r7  -->
+
+</figure>
+<!-- l. 422 --><p class='noindent'>The different network structures used in the experiments are shown in Table <a href='#x1-12001r1'>1<!-- tex4ht:ref: table:configs  --></a>, where
+B1, B2, and B3 are different structures of different Base extractors, and their specific
+compositions are shown in Fig. <a href='#x1-11008r1'>2a<!-- tex4ht:ref: fig:B1  --></a>, Fig. <a href='#x1-11009r2'>2b<!-- tex4ht:ref: fig:B2  --></a>, and Fig. <a href='#x1-11010r3'>2c<!-- tex4ht:ref: fig:B3  --></a>. O1 and O2 represent
+different Output structures, and their specific compositions are shown in Fig. <a href='#x1-11013r1'>3a<!-- tex4ht:ref: fig:O1  --></a> and
+Fig. <a href='#x1-11014r2'>3b<!-- tex4ht:ref: fig:O2  --></a>.
+</p><!-- l. 424 --><p class='noindent'>In the figure, 1x7 (1,2) p(0,3) means that the size of the convolution kernel of this
+layer is 1 <span class='cmsy-10'>× </span>7, the number of input channels is 1, the number of output channels is 2,
+and the size of the padding is (0 ,3). The size of the number after the letter s
+represents the size of the stride. The parameters of other convolutional layers can be
+explained accordingly.
+</p><!-- l. 426 --><p class='noindent'>Because larger convolution kernels will take up more computational resources, and
+the excessive number of parameters will also make the network training difficult, two
+corresponding one-dimensional convolutions are used for convolution kernels larger
+than 3 <span class='cmsy-10'>× </span>3 in the experiments of this paper.
+</p><!-- l. 428 --><p class='noindent'>By pairing the experiments, the following points can be found.
+     </p><ol class='enumerate1'>
+<li class='enumerate' id='x1-12015x1'>using Dropout at the end of the kanji generation network will use the
+     presence of noise in the final generated result of the network. The dropout
+     layers are used in net1, net2, net3, and net4, and with a small probability
+     of 0 of 0<span class='cmmi-10'>.</span>1, all the 4 networks show noise in the generated results, and
+     the strokes of the Chinese characters are missing to some extent. This is
+     probably due to the fact that the dropout layer is located at the end of
+     the network and the network has no chance to correct the defects in the
+     feature maps afterwards. It also shows that it is better not to use dropout
+     at the end of the Chinese character font generation network.
+     </li>
+<li class='enumerate' id='x1-12017x2'>The larger convolutional energy in the first stage gives better results. In
+     net2, net5, net6, and net9, the largest convolution kernels are used, and
+     the results of these networks are significantly better than those of the
+     other networks. This illustrates that using larger convolutional kernels
+     in  shallower  layers  can  yield  better  results  in  Chinese  character  font
+     generation networks.
+     </li>
+<li class='enumerate' id='x1-12019x3'>more intermediate layers can get better results. In net1, net2, net4, and
+
+     net5, a relatively large number of intermediate layers are used, and it is
+     observed that all three networks except net1 have better results than the
+     version with fewer derivatives.
+     </li>
+<li class='enumerate' id='x1-12021x4'>The use of Sigmod at the end of the network impairs the performance of
+     the Chinese character generation network. Of the 9 networks trained in the
+     experiment, only net1 uses sigmod. even though more derivatives are used
+     in net1, it still performs worse than all other versions. In summary, when
+     using convolutional neural networks for Chinese character font generation,
+     not  using  dropout  and  sigmod  at  the  end  of  the  network  and  using
+     larger convolutional kernels with more convolutional layers can give better
+     results.</li></ol>
+<!-- l. 437 --><p class='noindent'>There are more examples in Fig.<a href='#x1-12022r6'>6<!-- tex4ht:ref: fig:result  --></a> for the result. On the left is the standard
+Chinese character image in the computer, and on the right is the corresponding
+changed style of Chinese characters generated by the neural network. You
+can see that the characters have not changed, but the style has changed
+significantly
+</p>
+<figure class='figure'> 
+
+
+
+<!-- l. 443 --><p class='noindent' id='-network-output-illustration-'> <img alt='PIC' height='345' src='figures//result_v0.1-.png' width='345' /> <a id='x1-12022r6'></a>
+<a id='x1-12023'></a>
+</p>
+<figcaption class='caption'><span class='id'>Figure 6: </span><span class='content'>Network Output Illustration                                  </span></figcaption><!-- tex4ht:label?: x1-12022r7  -->
+
+</figure>
+<h3 class='sectionHead' id='conclusion'><span class='titlemark'>8   </span> <a id='x1-130008'></a>Conclusion</h3>
+<!-- l. 454 --><p class='noindent'>In order to achieve efficient and low-cost Chinese character font generation, this
+paper conducts a series of explorations. Using 9 sets of comparative experiments, we
+propose several design principles for Chinese character generation networks: using
+larger convolutional kernels, using deeper networks, and not using dropout and
+sigmod at the end. It is also shown that using only convolutional neural networks
+without other complex network structures can achieve good results in Chinese
+character font generation.
+
+</p>
+<h3 class='likesectionHead' id='references'><a id='x1-140008'></a>References</h3>
+<!-- l. 1 --><p class='noindent'>
+    </p><div class='thebibliography'>
+    <p class='bibitem'><span class='biblabel'>
+  [1]<span class='bibsp'>   </span></span><a id='XAzadi2018'></a>Samaneh Azadi, Matthew Fisher, Vladimir Kim, Zhaowen Wang, Eli
+    Shechtman, and Trevor Darrell. Multi-content GAN for few-shot font style
+    transfer. In <span class='cmti-10'>2018 IEEE/CVF Conference on Computer Vision and Pattern
+    </span><span class='cmti-10'>Recognition</span>. IEEE, jun 2018.
+    </p>
+    <p class='bibitem'><span class='biblabel'>
+  [2]<span class='bibsp'>   </span></span><a id='XBaluja2016'></a>Shumeet Baluja. Learning Typographic Style. 2016.
+    </p>
+    <p class='bibitem'><span class='biblabel'>
+  [3]<span class='bibsp'>   </span></span><a id='XChang2018'></a>Bo Chang,  Qiong  Zhang,  Shenyi  Pan,  and  Lili  Meng.   Generating
+    Handwritten Chinese Characters Using CycleGAN.   <span class='cmti-10'>Proceedings - 2018
+    </span><span class='cmti-10'>IEEE  Winter  Conference  on  Applications  of  Computer  Vision,  WACV
+    </span><span class='cmti-10'>2018</span>, 2018-January:199–207, 2018.
+    </p>
+    <p class='bibitem'><span class='biblabel'>
+  [4]<span class='bibsp'>   </span></span><a id='XKingma2014'></a>Diederik P. Kingma and Jimmy Ba.  Adam: A method for stochastic
+    optimization. December 2014.
+    </p>
+    <p class='bibitem'><span class='biblabel'>
+  [5]<span class='bibsp'>   </span></span><a id='XLi2017'></a>Chenhao   Li,   Yuta   Taniguchi,   Min   Lu,   and   Hajime   Nagahara.
+    Cross-language font style transfer. (Chenhao Li):1–11, 2017.
+    </p>
+    <p class='bibitem'><span class='biblabel'>
+  [6]<span class='bibsp'>   </span></span><a id='XSun2018'></a>Danyang Sun, Tongzheng Ren, Chongxuan Li, Hang Su, and Jun Zhu.
+    Learning  to  write  stylized  Chinese  characters  by  reading  a  handful  of
+    examples. <span class='cmti-10'>IJCAI International Joint Conference on Artificial Intelligence</span>,
+    2018-July:920–927, 2018.
+    </p>
+    <p class='bibitem'><span class='biblabel'>
+  [7]<span class='bibsp'>   </span></span><a id='XTang2021'></a>Shusen Tang and Zhouhui Lian.  Write Like You: Synthesizing Your
+    Cursive  Online  Chinese  Handwriting  via  Metric-based  Meta  Learning.
+    <span class='cmti-10'>Computer Graphics Forum</span>, 40(2):141–151, 2021.
+
+    </p>
+    <p class='bibitem'><span class='biblabel'>
+  [8]<span class='bibsp'>   </span></span><a id='XXiao2021'></a>Yun                                  Xiao,                                   Wenlong
+    Lei, Lei Lu, Xiaojun Chang, Xia Zheng, and Xiaojiang Chen.  CS-GAN:
+    Cross-Structure Generative Adversarial Networks for Chinese calligraphy
+    translation[Formula  presented].   <span class='cmti-10'>Knowledge-Based  Systems</span>,  229:107334,
+    2021.
+    </p>
+    <p class='bibitem'><span class='biblabel'>
+  [9]<span class='bibsp'>   </span></span><a id='XXie2021'></a>Yangchen  Xie,  Xinyuan  Chen,  Li Sun,  and  Yue  Lu.     DG-Font:
+    Deformable  Generative  Networks  for  Unsupervised  Font  Generation.
+    <span class='cmti-10'>Proceedings of the IEEE Computer Society Conference on Computer Vision
+    </span><span class='cmti-10'>and Pattern Recognition</span>, pages 5126–5136, 2021.
+    </p>
+    <p class='bibitem'><span class='biblabel'>
+ [10]<span class='bibsp'>   </span></span><a id='XZeng2020'></a>Jinshan Zeng, Qi Chen, Yunxin Liu, Mingwen Wang, and Yuan Yao.
+    StrokeGAN:  Reducing  Mode  Collapse  in  Chinese  Font  Generation  via
+    Stroke Encoding. 2020.
+</p>
+    </div>
+ 
+</body> 
+</html>
